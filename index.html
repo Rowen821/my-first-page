@@ -1,10 +1,183 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My First GitHub Pages</title>
+    <title>FALNIX Music - あなただけの音楽空間</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FALNIX Musicは、お気に入りの音楽をジャンル別に楽しめるWebサイトです。">
+    <meta name="keywords" content="音楽, YouTube, dubstep, techno">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"> -->
 </head>
 <body>
-    <h1>Hello, World!</h1>
-    <p>This is my first GitHub Pages site.</p>
+    <header>
+        <h1>FALNIX Music</h1>
+    </header>
+    <nav>
+        <ul class="flex" id="menu">
+            <!-- <li id="dubstep">dubstep</li> -->
+        </ul>
+    </nav>
+    <article id="article">
+        <!-- <section>
+            <p>Fire</p>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/Bz3DKGHSeoI?si=sM6snJT1IJp-hBRG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </section> -->
+    </article>
 </body>
+<style>
+
+.flex{
+    display: flex;
+}
+nav {
+    margin: 0%;
+    padding: 0;
+    border: 1px solid #f00;
+}
+ul{
+    margin: 0;
+    padding: 2%;
+}
+li{
+    margin: 2%;
+    padding: 3%;
+    list-style: none;
+    border: 1px solid #f00;
+
+}
+article {
+    width: 79vw;
+}
+.youtube {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+.youtube iframe {
+  width: 100%;
+  height: 100%;
+}
+</style>
+<script>
+let category = ["all", "dubstep", "techno","trance","edm","dance","electro","eurobeat","hardcore","noise","ambient","relax","healing","chillout","psychedelic","metal","lofi","hiphop","cover","orchestra","originalmix"];
+let content = [
+    ["dubstep", "Radioactive", { url: "https://www.youtube.com/embed/gcSdyd39uAs?si=WD_9_-qz6IWXYhiN", title: "YouTube video player" }],
+    ["dubstep", "SleepForest", { url: "https://www.youtube.com/embed/D0QHLvAyAi8", title: "YouTube video player" }],
+    ["techno", "WhiteClowd", { url: "https://www.youtube.com/embed/9oFTfK1HUdU", title: "YouTube video player" }],
+    ["techno", "TheORIGIN", { url: "https://www.youtube.com/embed/5FaJiRe5rhk", title: "YouTube video player" }],
+    ["techno", "RelaxDays", { url: "https://www.youtube.com/embed/GJC2Odr-WlE", title: "YouTube video player" }],
+    ["techno", "DailyFlow", { url: "https://www.youtube.com/embed/V5l_u1EPFIE", title: "YouTube video player" }],
+    ["techno", "MarsDream", { url: "https://www.youtube.com/embed/261naxjGkew", title: "YouTube video player" }],
+    ["techno", "JungleRain", { url: "https://www.youtube.com/embed/JAvo32B8XPg", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "https://www.youtube.com/embed/", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+    ["techno", "", { url: "", title: "YouTube video player" }],
+];
+
+window.onload = function() {
+  let menu = document.getElementById("menu");
+  for (let i = 0; i < category.length; i++) {
+    let li = document.createElement("li");
+    li.id = category[i];
+    li.textContent = category[i];
+    if (category[i] === "all") {
+      li.classList.add("active"); // 初期表示で"all"にactiveクラスを追加
+    }
+    menu.appendChild(li);
+  }
+
+  // 初期表示で"all"のコンテンツを表示
+  displayContent("all");
+
+  // メニューのクリックイベントリスナー
+  menu.addEventListener("click", function(event) {
+    const clickedCategory = event.target.id;
+    displayContent(clickedCategory);
+  });
+};
+
+function displayContent(clickedCategory) {
+  const article = document.getElementById('article');
+  article.innerHTML = '';
+
+  let selectedContent;
+  if (clickedCategory === 'all') {
+    selectedContent = content;
+  } else {
+    selectedContent = content.filter(item => item[0] === clickedCategory);
+  }
+
+  selectedContent.forEach(item => {
+        const newSection = document.createElement('section');
+        const newDiv = document.createElement('div');
+        newDiv.classList.add('youtube'); // divにyoutubeクラスを追加
+
+        const newP = document.createElement('p');
+        newP.textContent = item[1];
+
+        const newIframe = document.createElement('iframe');
+        newIframe.width = "100%";
+        newIframe.height = "100%";
+        newIframe.src = item[2].url; // YouTubeのURL
+        newIframe.title = item[2].title;
+        newIframe.frameborder = "0";
+        newIframe.allowFullscreen = true;
+
+        newDiv.appendChild(newIframe); // iframeをdiv.youtubeの中に追加
+        newSection.appendChild(newP);
+        newSection.appendChild(newDiv);
+        article.appendChild(newSection);
+    });
+}
+</script>
+<!-- <script src="./index.js"></script> -->
 </html>
