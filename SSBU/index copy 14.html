@@ -51,7 +51,7 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const fighters = ["マリオ", "ドンキーコング", "リンク", "サムス", "ミェンミェン"];
+        const fighters = ["マリオ", "ドンキーコング", "リンク", "サムス", "ヨッシー", "カービィ", "ピカチュウ", "ポケモントレーナー", "ルイージ", "ネス", "フォックス", "ピーチ", "ダックハント", "アイスクライマー", "ファルコ", "マルス", "ルキナ", "シーク", "ゼルダ", "ロイ", "クロム", "リュウ", "ケン", "カズヤ", "スネーク", "クッパ", "インクリング", "パルテナ", "パックマン", "ロボット", "シモン", "リヒター", "ピチュー", "プリン", "メタナイト", "ガノンドロフ", "アイク", "ミュウツー", "ソニック", "ベヨネッタ", "リトルマック", "キングクルール", "ジョーカー", "バンジョー＆カズーイ", "セフィロス", "ダークサムス", "ワリオ", "ゼロスーツサムス", "ロックマン", "勇者", "キャプテンファルコン", "クラウド", "デイジー", "デデデ", "ディディーコング", "テリー", "ゲーム＆ウォッチ", "ガオガエン", "ゲッコウガ", "カムイ", "クッパＪｒ", "ルカリオ", "リュカ", "ドクターマリオ", "ベレト", "格闘Ｍｉｉ", "剣術Ｍｉｉ", "射撃Ｍｉｉ", "むらびと", "パックンフラワー", "ピクミン＆オリマー", "ピット", "ブラックピット", "ルフレ", "リドリー", "チコ＆ロゼッタ", "しずえ", "シュルク", "トゥーンリンク", "ＷｉｉＦｉｔトレーナー", "ウルフ", "こどもリンク", "ホムラ＆ヒカリ", "ソラ", "スティーブ", "ミェンミェン"];
         let selfChar = "マリオ", selChar = null;
         let monthlyChartInstance = null, dailyChartInstance = null;
 
@@ -185,6 +185,7 @@
                     ["winBtn", "loseBtn", "minusWinBtn", "minusLoseBtn"].forEach(id => 
                         document.getElementById(id).disabled = false
                     );
+                    updateDailyChart(results, selfChar, selChar); // Update the daily chart on click
                 });
                 menu.appendChild(li);
             });
@@ -226,7 +227,7 @@
             updateCharacterButtons(results, selfChar);
             updateWinRateInfo(results, selfChar);
             updateChart(results, selfChar);
-            updateDailyChart(results, selfChar, selChar);
+            updateDailyChart(results, selfChar, selChar); // Update daily chart after action
         };
 
         window.onload = () => {
