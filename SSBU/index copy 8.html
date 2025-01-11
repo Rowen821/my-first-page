@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ファイター勝敗ツール</title>
+    <style>
+        /* レイアウトの調整 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px;
+            width: 90%;
+        }
+
+        .fighter-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .fighter-selection select,
+        .fighter-selection button {
+            margin-bottom: 10px;
+            font-size: 16px;
+            padding: 5px;
+        }
+
+        .fighter-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .fighter-list img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .fighter-list img.selected {
+            border: 3px solid blue;
+            transform: scale(1.2);
+        }
+
+        .fighter-list img:hover {
+            transform: scale(1.1);
+        }
+
+        /* ボタンの状態制御 */
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* グラフのスタイル */
+        .chart-container {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .chart-container canvas {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="fighter-selection">
+            <select id="selfCharacterSelect">
+                <option value="マリオ">マリオ</option>
+                <option value="リンク">リンク</option>
+                <option value="ヨッシー">ヨッシー</option>
+                <option value="カービィ">カービィ</option>
+                <option value="ピカチュウ">ピカチュウ</option>
+                <!-- 他のファイターを追加する場合 -->
+            </select>
+            <button id="startRecognitionButton">音声認識開始</button>
+            <button id="stopRecognitionButton" disabled>音声認識停止</button>
+        </div>
+        <div class="fighter-list" id="fighterList">
+            <!-- 敵キャラアイコンは動的に表示されます -->
+        </div>
+    </div>
+    <div class="chart-container">
+        <canvas id="winRateChart"></canvas>
+        <canvas id="dailyChart"></canvas>
+    </div>
+    <div>
+        <button id="winButton">勝ち</button>
+        <button id="loseButton">負け</button>
+        <button id="winMinusButton">勝ち-1</button>
+        <button id="loseMinusButton">負け-1</button>
+    </div>
+
+    <script>
+        const fighterList = [
+            "マリオ", "ドンキーコング", "リンク", "サムス", "ヨッシー", "カービィ", "ピカチュウ", "ポケモントレーナー", "ルイージ", "ネス",
+            "フォックス", "ピーチ", "ダックハント", "アイスクライマー", "ファルコ", "マルス", "ルキナ", "シーク", "ゼルダ", "ロイ",
+            "クロム", "リュウ", "ケン", "カズヤ", "スネーク", "クッパ", "インクリング", "パルテナ", "パックマン", "ロボット",
+            "シモン", "リヒター", "ピチュー", "プリン", "メタナイト", "ガノンドロフ", "アイク", "ミュウツー", "ソニック", "ベヨネッタ",
+            "リトルマック", "キングクルール", "ジョーカー", "バンジョー＆カズーイ", "セフィロス", "ダークサムス", "ワリオ", "ゼロスーツサムス", "ロックマン",
+            "勇者", "キャプテンファルコン", "クラウド", "デイジー", "デデデ", "ディディーコング", "テリー", "ゲーム＆ウォッチ", "ガオガエン", "ゲッコウガ", "カムイ", "クッパＪｒ", 
+            "ルカリオ", "リュカ", "ドクターマリオ", "ベレト", "格闘Ｍｉｉ", "剣術Ｍｉｉ", "射撃Ｍｉｉ", "むらびと", "パックンフラワー", "ピクミン＆オリマー", "ピット", "ブラックピット", "ルフレ", 
+            "リドリー", "チコ＆ロゼッタ", "しずえ", "シュルク", "トゥーンリンク", "ＷｉｉＦｉｔトレーナー", "ウルフ", "こどもリンク", "ホムラ＆ヒカリ", "ソラ", "スティーブ", "ミェンミェン"
+        ];
+
+        const fighterListElement = document.getElementById('fighterList');
+        const selfCharacterSelect = document.getElementById('selfCharacterSelect');
+        const startRecognitionButton = document.getElementById('startRecognitionButton');
+        const stopRecognitionButton = document.getElementById('stopRecognitionButton');
+        const winButton = document.getElementById('winButton');
+        const loseButton = document.getElementById('loseButton');
+        const winMinusButton = document.getElementById('winMinusButton');
+        const loseMinusButton = document.getElementById('loseMinusButton');
+
+        let selectedFighter = selfCharacterSelect.value;
+        let selectedEnemyFighter = null;
+
+        // 敵キャラアイコン表示
+        fighterList.forEach(fighter => {
+            const img = document.createElement('img');
+            img.src = `./images/${fighter}.png`; // 画像パスを適切に設定
+            img.alt = fighter;
+            img.addEventListener('click', () => selectEnemyFighter(fighter, img));
+            fighterListElement.appendChild(img);
+        });
+
+        // 敵キャラ選択処理
+        function selectEnemyFighter(fighter, imgElement) {
+            selectedEnemyFighter = fighter;
+            // すべての画像から.selectedクラスを削除
+            document.querySelectorAll('.fighter-list img').forEach(img => img.classList.remove('selected'));
+            // クリックした画像に.selectedクラスを追加
+            imgElement.classList.add('selected');
+            updateButtonState();
+        }
+
+        // 勝敗ボタンの状態更新
+        function updateButtonState() {
+            if (selectedEnemyFighter) {
+                winButton.disabled = false;
+                loseButton.disabled = false;
+                winMinusButton.disabled = false;
+                loseMinusButton.disabled = false;
+            } else {
+                winButton.disabled = true;
+                loseButton.disabled = true;
+                winMinusButton.disabled = true;
+                loseMinusButton.disabled = true;
+            }
+        }
+
+        // 音声認識ボタン
+        startRecognitionButton.addEventListener('click', () => {
+            // 音声認識を開始
+            startRecognitionButton.disabled = true;
+            stopRecognitionButton.disabled = false;
+        });
+
+        stopRecognitionButton.addEventListener('click', () => {
+            // 音声認識を停止
+            startRecognitionButton.disabled = false;
+            stopRecognitionButton.disabled = true;
+        });
+
+        // 勝ち、負けボタンイベント
+        winButton.addEventListener('click', () => {
+            alert(`${selectedFighter} vs ${selectedEnemyFighter} で勝ちました！`);
+        });
+
+        loseButton.addEventListener('click', () => {
+            alert(`${selectedFighter} vs ${selectedEnemyFighter} で負けました！`);
+        });
+    </script>
+</body>
+</html>

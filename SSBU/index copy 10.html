@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ファイター勝敗ツール</title>
+    <style>
+        /* レイアウト全体 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        /* 自キャラ選択エリア */
+        .fighter-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .fighter-selection select,
+        .fighter-selection button {
+            margin-bottom: 10px;
+            font-size: 16px;
+            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        /* 敵キャラアイコンの表示 */
+        .fighter-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 900px;
+            text-align: center;
+        }
+
+        .fighter-list img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .fighter-list img.selected {
+            border: 3px solid blue;
+            transform: scale(1.2);
+        }
+
+        .fighter-list img:hover {
+            transform: scale(1.1);
+        }
+
+        .fighter-stats {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .fighter-stats .stats-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fighter-stats .wins {
+            color: red;
+            margin-right: 5px;
+        }
+
+        .fighter-stats .losses {
+            color: blue;
+            margin-left: 5px;
+        }
+
+        .fighter-stats .win-rate {
+            color: green;
+        }
+
+        /* ボタンの状態制御 */
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* グラフのスタイル */
+        .chart-container {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+        }
+
+        .chart-container canvas {
+            width: 100%;
+        }
+
+        /* 常に画面下部に表示されるボタン */
+        .action-buttons {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: white;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* モバイル対応 */
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+            }
+
+            .fighter-selection select,
+            .fighter-selection button {
+                width: 90%;
+            }
+
+            .fighter-list {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .fighter-selection select,
+            .fighter-selection button {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .fighter-list {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+
+            .fighter-stats {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 自キャラ選択エリア -->
+        <div class="fighter-selection">
+            <select id="selfCharacterSelect">
+                <!-- 自キャラの選択肢を生成 -->
+            </select>
+            <button id="startRecognitionButton">音声認識開始</button>
+            <button id="stopRecognitionButton" disabled>音声認識停止</button>
+        </div>
+
+        <!-- 敵キャラアイコンリスト -->
+        <div class="fighter-list" id="fighterList">
+            <!-- 敵キャラアイコンは動的に表示されます -->
+        </div>
+    </div>
+
+    <!-- 勝敗ボタン（画面下部に固定表示） -->
+    <div class="action-buttons">
+        <button id="winButton" disabled>勝ち</button>
+        <button id="loseButton" disabled>負け</button>
+        <button id="winMinusButton" disabled>勝ち-1</button>
+        <button id="loseMinusButton" disabled>負け-1</button>
+    </div>
+
+    <!-- グラフの表示エリア -->
+    <div class="chart-container">
+        <canvas id="winRateChart"></canvas>
+        <canvas id="dailyChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ファイターリスト（キャラクター名）
+        const fighterList = [
+            "マリオ", "ドンキーコング", "リンク", "サムス", "ヨッシー", "カービィ", "ピカチュウ", "ポケモントレーナー", "ルイージ", "ネス",
+            "フォックス", "ピーチ", "ダックハント", "アイスクライマー", "ファルコ", "マルス", "ルキナ", "シーク", "ゼルダ", "ロイ",
+            "クロム", "リュウ", "ケン", "カズヤ", "スネーク", "クッパ", "インクリング", "パルテナ", "パックマン", "ロボット",
+            "シモン", "リヒター", "ピチュー", "プリン", "メタナイト", "ガノンドロフ", "アイク", "ミュウツー", "ソニック", "ベヨネッタ",
+            "リトルマック", "キングクルール", "ジョーカー", "バンジョー＆カズーイ", "セフィロス", "ダークサムス", "ワリオ", "ゼロスーツサムス", "ロックマン",
+            "勇者", "キャプテンファルコン", "クラウド", "デイジー", "デデデ", "ディディーコング", "テリー", "ゲーム＆ウォッチ", "ガオガエン", "ゲッコウガ", "カムイ", "クッパＪｒ", 
+            "ルカリオ", "リュカ", "ドクターマリオ", "ベレト", "格闘Ｍｉｉ", "剣術Ｍｉｉ", "射撃Ｍｉｉ", "むらびと", "パックンフラワー", "ピクミン＆オリマー", "ピット", "ブラックピット", "ルフレ", 
+            "リドリー", "チコ＆ロゼッタ", "しずえ", "シュルク", "トゥーンリンク", "ＷｉｉＦｉｔトレーナー", "ウルフ", "こどもリンク", "ホムラ＆ヒカリ", "ソラ", "スティーブ", "ミェンミェン"
+        ];
+
+        // 勝敗の記録
+        const fighterStats = {};
+
+        // 初期設定
+        fighterList.forEach(fighter => {
+            fighterStats[fighter] = { wins: 0, losses: 0, winRate: 0 };
+        });
+
+        let selectedFighter = null;  // 自キャラ
+        let selectedEnemyFighter = null;  // 敵キャラ
+
+        // UI要素の取得
+        const fighterListElement = document.getElementById('fighterList');
+        const selfCharacterSelect = document.getElementById('selfCharacterSelect');
+        const winButton = document.getElementById('winButton');
+        const loseButton = document.getElementById('loseButton');
+        const winMinusButton = document.getElementById('winMinusButton');
+        const loseMinusButton = document.getElementById('loseMinusButton');
+
+        // 自キャラの選択肢を生成
+        fighterList.forEach(fighter => {
+            const option = document.createElement('option');
+            option.value = fighter;
+            option.textContent = fighter;
+            selfCharacterSelect.appendChild(option);
+        });
+
+        // 敵キャラアイコンの生成
+        fighterList.forEach(fighter => {
+            const img = document.createElement('img');
+            img.src = `./images/${fighter}.png`; // 画像パス
+            img.alt = fighter;
+            img.addEventListener('click', () => selectEnemyFighter(fighter, img));
+
+            const statsDiv = document.createElement('div');
+            statsDiv.classList.add('fighter-stats');
+            statsDiv.innerHTML = `
+                <div class="stats-row">
+                    <div class="wins">0</div>
+                    <div class="losses">0</div>
+                </div>
+                <div class="win-rate">0%</div>
+            `;
+
+            const fighterDiv = document.createElement('div');
+            fighterDiv.appendChild(img);
+            fighterDiv.appendChild(statsDiv);
+            fighterListElement.appendChild(fighterDiv);
+        });
+
+        // 自キャラ選択
+        selfCharacterSelect.addEventListener('change', (e) => {
+            selectedFighter = e.target.value;
+            updateButtonState();
+            updateStatsDisplay();  // 自キャラ選択時に統計を更新
+        });
+
+        // 敵キャラ選択
+        function selectEnemyFighter(fighter, imgElement) {
+            selectedEnemyFighter = fighter;
+            document.querySelectorAll('.fighter-list img').forEach(img => img.classList.remove('selected'));
+            imgElement.classList.add('selected');
+            updateButtonState();
+        }
+
+        // ボタンの有効/無効切り替え
+        function updateButtonState() {
+            const isEnemySelected = !!selectedEnemyFighter && selectedFighter !== null;
+            winButton.disabled = !isEnemySelected;
+            loseButton.disabled = !isEnemySelected;
+            winMinusButton.disabled = !isEnemySelected;
+            loseMinusButton.disabled = !isEnemySelected;
+        }
+
+        // 勝ちボタンの処理
+        winButton.addEventListener('click', () => {
+            if (selectedEnemyFighter && selectedFighter) {
+                fighterStats[selectedEnemyFighter].wins++;  // 敵キャラの勝ち数を増やす
+                updateStatsDisplay();
+            }
+        });
+
+        // 負けボタンの処理
+        loseButton.addEventListener('click', () => {
+            if (selectedEnemyFighter && selectedFighter) {
+                fighterStats[selectedEnemyFighter].losses++;  // 敵キャラの負け数を増やす
+                updateStatsDisplay();
+            }
+        });
+
+        // 勝ち-1 ボタンの処理
+        winMinusButton.addEventListener('click', () => {
+            if (selectedEnemyFighter && selectedFighter && fighterStats[selectedEnemyFighter].wins > 0) {
+                fighterStats[selectedEnemyFighter].wins--;  // 敵キャラの勝ち数を減らす
+                updateStatsDisplay();
+            }
+        });
+
+        // 負け-1 ボタンの処理
+        loseMinusButton.addEventListener('click', () => {
+            if (selectedEnemyFighter && selectedFighter && fighterStats[selectedEnemyFighter].losses > 0) {
+                fighterStats[selectedEnemyFighter].losses--;  // 敵キャラの負け数を減らす
+                updateStatsDisplay();
+            }
+        });
+
+        // 勝敗統計の表示更新
+        function updateStatsDisplay() {
+            const statsDivs = document.querySelectorAll('.fighter-list .fighter-stats');
+            statsDivs.forEach((statsDiv, index) => {
+                const fighterName = fighterList[index];
+                const stats = fighterStats[fighterName];
+                const winRate = ((stats.wins / (stats.wins + stats.losses)) * 100) || 0;
+                statsDiv.querySelector('.wins').textContent = stats.wins;
+                statsDiv.querySelector('.losses').textContent = stats.losses;
+                statsDiv.querySelector('.win-rate').textContent = `${winRate.toFixed(2)}%`;
+            });
+        }
+    </script>
+</body>
+</html>

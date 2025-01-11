@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>スマブラSP 勝敗管理</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <header>
+        <h1>スマブラSP 勝敗管理ツール</h1>
+    </header>
+    <nav>
+        <ul class="flex" id="menu"></ul>
+    </nav>
+    <style>
+        .flex {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        li {
+            margin: 10px;
+            padding: 10px;
+            list-style: none;
+            border: 1px solid #ccc;
+            text-align: center;
+            width: 150px;
+        }
+        img {
+            width: 100px;
+            height: auto;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+    <script>
+        const fighter = [
+            "マリオ", "ドンキーコング", "リンク", "サムス", "ヨッシー", "カービィ", "ピカチュウ", "ポケモントレーナー"
+            // 他のキャラクターを追加
+        ];
+
+        // 勝敗データをローカルストレージから取得
+        function loadResults() {
+            const results = localStorage.getItem("fighterResults");
+            return results ? JSON.parse(results) : {};
+        }
+
+        // 勝敗データをローカルストレージに保存
+        function saveResults(results) {
+            localStorage.setItem("fighterResults", JSON.stringify(results));
+        }
+
+        window.onload = function () {
+            const menu = document.getElementById("menu");
+            const results = loadResults();
+
+            fighter.forEach(name => {
+                const li = document.createElement("li");
+                li.id = name;
+
+                // キャラクター画像
+                const img = document.createElement("img");
+                img.src = `./image/${name}.png`;
+
+                // キャラクター名
+                const title = document.createElement("p");
+                title.textContent = name;
+
+                // 勝ちボタン
+                const winButton = document.createElement("button");
+                winButton.textContent = "勝ち";
+                winButton.onclick = () => {
+                    results[name] = results[name] || { win: 0, lose: 0 };
+                    results[name].win++;
+                    saveResults(results);
+                    updateResults(li, results[name]);
+                };
+
+                // 負けボタン
+                const loseButton = document.createElement("button");
+                loseButton.textContent = "負け";
+                loseButton.onclick = () => {
+                    results[name] = results[name] || { win: 0, lose: 0 };
+                    results[name].lose++;
+                    saveResults(results);
+                    updateResults(li, results[name]);
+                };
+
+                // 結果表示
+                const resultDisplay = document.createElement("div");
+                resultDisplay.className = "results";
+                li.appendChild(img);
+                li.appendChild(title);
+                li.appendChild(winButton);
+                li.appendChild(loseButton);
+                li.appendChild(resultDisplay);
+
+                // 初期状態の結果を表示
+                updateResults(li, results[name]);
+
+                menu.appendChild(li);
+            });
+        };
+
+        // 勝敗結果を更新
+        function updateResults(li, data) {
+            const resultDisplay = li.querySelector(".results");
+            if (data) {
+                resultDisplay.textContent = `勝ち: ${data.win} | 負け: ${data.lose}`;
+            } else {
+                resultDisplay.textContent = `勝ち: 0 | 負け: 0`;
+            }
+        }
+    </script>
+</body>
+</html>

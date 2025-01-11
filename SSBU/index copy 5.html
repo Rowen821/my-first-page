@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>スマブラSP 勝敗管理</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <h1>スマブラSP 勝敗管理ツール</h1>
+    </header>
+    <main>
+        <!-- キャラクター選択 -->
+        <section>
+            <h2>キャラクター選択</h2>
+            <ul class="flex" id="menu"></ul>
+        </section>
+
+        <!-- アクションボタン -->
+        <section>
+            <h2>アクション</h2>
+            <div>
+                <button id="winButton" disabled>勝ち</button>
+                <button id="loseButton" disabled>負け</button>
+                <button id="minusWinButton" disabled>勝ち -1</button>
+                <button id="minusLoseButton" disabled>負け -1</button>
+            </div>
+        </section>
+
+        <!-- 結果表示 -->
+        <section>
+            <h2>結果</h2>
+            <div id="results"></div>
+        </section>
+
+        <!-- 勝率パイチャート -->
+        <section>
+            <h2>勝率パイチャート</h2>
+            <canvas id="winRateChart" width="400" height="400"></canvas>
+        </section>
+    </main>
+
+    <style>
+        .flex {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        li {
+            margin: 10px;
+            padding: 10px;
+            list-style: none;
+            border: 1px solid #ccc;
+            text-align: center;
+            width: 100px;
+            cursor: pointer;
+        }
+        li.selected {
+            border: 2px solid #00f;
+            background-color: #eef;
+        }
+        img {
+            width: 80px;
+            height: auto;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+
+<script>
+    const fighter = ["マリオ", "リンク", "サムス", "ヨッシー", "カービィ"];
+
+    let selectedCharacter = null;
+    let winRateChartInstance = null;  // Chart.jsのインスタンスを格納する変数
+
+    // 勝敗データをローカルストレージから取得
+    function loadResults() {
+        const results = localStorage.getItem("fighterResults");
+        return results ? JSON.parse(results) : {};
+    }
+
+    // 勝敗データをローカルストレージに保存
+    function saveResults(results) {
+        localStorage.setItem("fighterResults", JSON.stringify(results));
+    }
+
+    // 勝率を計算してパイチャートを更新
+    function updateWinRateChart(results) {
+        const totalGames = Object.values(results).reduce((acc, data) => acc + data.win + data.lose, 0);
+        const totalWins = Object.values(results).reduce((acc, data) => acc + data.win, 0);
+        const winRate = totalGames > 0 ? (totalWins / totalGames) * 100 : 0;
+        const loseRate = 100 - winRate;
+
+        // 既存のチャートを破棄
+        if (winRateChartInstance) {
+            winRateChartInstance.destroy();
+        }
+
+        // パイチャートを描画
+        const ctx = document.getElementById('winRateChart').getContext('2d');
+        winRateChartInstance = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['勝ち', '負け'],
+                datasets: [{
+                    data: [winRate, loseRate],
+                    backgroundColor: ['#36A2EB', '#FF6384'],
+                    hoverBackgroundColor: ['#36A2EB', '#FF6384']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return `${tooltipItem.label}: ${tooltipItem.raw.toFixed(2)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 勝敗結果をキャラクターボタンに表示
+    function updateButtonWithStats(name, button, results) {
+        const winCount = results[name]?.win || 0;
+        const loseCount = results[name]?.lose || 0;
+        const winRate = winCount + loseCount > 0 ? ((winCount / (winCount + loseCount)) * 100).toFixed(1) : 0;
+
+        button.innerHTML = `
+            <img src="./image/${name}.png" alt="${name}">
+            <div style="display: flex;justify-content: center;align-items: center;">
+                <p style="color: red;"> ${winCount}</p>
+                <p style="color: blue;padding: 0 2vw;"> ${loseCount}</p>
+                <p style="color: green;"> ${winRate}%</p>
+            </div>
+        `;
+    }
+
+    // キャラクター選択時の処理
+    function selectCharacter(name, li, results) {
+        const previousSelected = document.querySelector("li.selected");
+        if (previousSelected) {
+            previousSelected.classList.remove("selected");
+        }
+        li.classList.add("selected");
+        selectedCharacter = name;
+
+        // アクションボタンを有効化
+        document.getElementById("winButton").disabled = false;
+        document.getElementById("loseButton").disabled = false;
+        document.getElementById("minusWinButton").disabled = false;
+        document.getElementById("minusLoseButton").disabled = false;
+    }
+
+    window.onload = function () {
+        const menu = document.getElementById("menu");
+        const winButton = document.getElementById("winButton");
+        const loseButton = document.getElementById("loseButton");
+        const minusWinButton = document.getElementById("minusWinButton");
+        const minusLoseButton = document.getElementById("minusLoseButton");
+        const results = loadResults();
+
+        // キャラクターリストを表示
+        fighter.forEach(name => {
+            const li = document.createElement("li");
+            li.id = name;
+
+            // キャラクターのボタンに勝敗情報を追加
+            updateButtonWithStats(name, li, results);
+
+            // キャラクター選択イベント
+            li.onclick = () => selectCharacter(name, li, results);
+
+            menu.appendChild(li);
+        });
+
+        // 勝ちボタンイベント
+        winButton.onclick = () => {
+            if (!selectedCharacter) return;
+            results[selectedCharacter] = results[selectedCharacter] || { win: 0, lose: 0 };
+            results[selectedCharacter].win++;
+            saveResults(results);
+            updateButtonWithStats(selectedCharacter, document.getElementById(selectedCharacter), results); // ボタンを更新
+            updateWinRateChart(results);  // 勝率チャートを更新
+        };
+
+        // 負けボタンイベント
+        loseButton.onclick = () => {
+            if (!selectedCharacter) return;
+            results[selectedCharacter] = results[selectedCharacter] || { win: 0, lose: 0 };
+            results[selectedCharacter].lose++;
+            saveResults(results);
+            updateButtonWithStats(selectedCharacter, document.getElementById(selectedCharacter), results); // ボタンを更新
+            updateWinRateChart(results);  // 勝率チャートを更新
+        };
+
+        // 勝ち -1ボタンイベント
+        minusWinButton.onclick = () => {
+            if (!selectedCharacter) return;
+            results[selectedCharacter] = results[selectedCharacter] || { win: 0, lose: 0 };
+            if (results[selectedCharacter].win > 0) {
+                results[selectedCharacter].win--;
+            }
+            saveResults(results);
+            updateButtonWithStats(selectedCharacter, document.getElementById(selectedCharacter), results); // ボタンを更新
+            updateWinRateChart(results);  // 勝率チャートを更新
+        };
+
+        // 負け -1ボタンイベント
+        minusLoseButton.onclick = () => {
+            if (!selectedCharacter) return;
+            results[selectedCharacter] = results[selectedCharacter] || { win: 0, lose: 0 };
+            if (results[selectedCharacter].lose > 0) {
+                results[selectedCharacter].lose--;
+            }
+            saveResults(results);
+            updateButtonWithStats(selectedCharacter, document.getElementById(selectedCharacter), results); // ボタンを更新
+            updateWinRateChart(results);  // 勝率チャートを更新
+        };
+
+        // 初期表示の勝率パイチャートを更新
+        updateWinRateChart(results);
+    };
+</script>
+
+</body>
+</html>

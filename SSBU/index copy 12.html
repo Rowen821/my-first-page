@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スマブラSP 勝敗管理ツール</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; padding-bottom: 60px; }
+        .flex { display: flex; flex-wrap: wrap; }
+        li { margin: 2px; padding: 2px; list-style: none; border: 1px solid #ccc; text-align: center; width: 50px; cursor: pointer; }
+        li.selected { border: 2px solid #00f; background-color: #eef; }
+        img { width: 50px; height: auto; }
+        button { margin: 5px; padding: 5px 12px; cursor: pointer; border: none; background-color: #4CAF50; color: white; border-radius: 5px; font-size: 16px; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+        .action-buttons {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header><h1></h1></header>
+    <main>
+        <section>
+            <h2>自キャラ選択</h2>
+            <select id="selfCharacterSelect"></select>
+        </section>
+        <section>
+            <h2>敵キャラ選択</h2>
+            <ul class="flex" id="menu"></ul>
+        </section>
+        <section>
+            <div class="action-buttons">
+                <button id="winBtn" disabled>勝ち</button>
+                <button id="loseBtn" disabled>負け</button>
+                <button id="minusWinBtn" disabled>勝ち -1</button>
+                <button id="minusLoseBtn" disabled>負け -1</button>
+            </div>
+        </section>
+        <section>
+            <!-- パイチャートを削除し、テキスト表示を追加 -->
+            <h2>勝率情報</h2>
+            <p id="highestWinRate">最も勝率の高い敵: なし</p>
+            <p id="lowestWinRate">最も勝率の低い敵: なし</p>
+        </section>
+    </main>
+    <script>
+        const fighters = ["マリオ", "ドンキーコング", "リンク", "サムス", "ヨッシー", "カービィ"];
+        let selfChar = "マリオ", selChar = null;
+
+        const loadResults = () => JSON.parse(localStorage.getItem("fighterResults") || "{}");
+        const saveResults = results => localStorage.setItem("fighterResults", JSON.stringify(results));
+
+        const updateWinRateInfo = (results, selfChar) => {
+            const enemies = results[selfChar] || {};
+            let highest = { name: "なし", rate: -1 }, lowest = { name: "なし", rate: 101 };
+
+            Object.entries(enemies).forEach(([name, stats]) => {
+                const { win = 0, lose = 0 } = stats;
+                const total = win + lose;
+                if (total === 0) return;
+                const rate = (win / total) * 100;
+                if (rate > highest.rate) highest = { name, rate };
+                if (rate < lowest.rate) lowest = { name, rate };
+            });
+
+            document.getElementById("highestWinRate").textContent = 
+                `最も勝率の高い敵: ${highest.name} (${highest.rate.toFixed(1)}%)`;
+            document.getElementById("lowestWinRate").textContent = 
+                `最も勝率の低い敵: ${lowest.name} (${lowest.rate.toFixed(1)}%)`;
+        };
+
+        const selectSelfCharacter = (e) => {
+            selfChar = e.target.value;
+            const results = loadResults();
+            fighters.forEach(name => {
+                const button = document.getElementById(name);
+                updateBtnWithStats(name, button, results, selfChar);
+            });
+            updateWinRateInfo(results, selfChar);
+        };
+
+        const updateBtnWithStats = (name, button, results, selfChar) => {
+        const { win = 0, lose = 0 } = results[selfChar]?.[name] || {};
+        const total = win + lose;
+        const rate = total ? ((win / total) * 100).toFixed(1) : "0.0";
+        button.innerHTML = `<img src="./images/${name}.png" alt="${name}">
+            <div>
+                <p style="color: red;">${win}</p>
+                <p style="color: blue;">${lose}</p>
+                <p style="color: green;">${rate}%</p>
+            </div>`;
+    };
+
+        const selectCharacter = (name, li, results, selfChar) => {
+            document.querySelector("li.selected")?.classList.remove("selected");
+            li.classList.add("selected");
+            selChar = name;
+            ["winBtn", "loseBtn", "minusWinBtn", "minusLoseBtn"].forEach(id => 
+                document.getElementById(id).disabled = false);
+        };
+
+        const action = (type) => {
+            if (!selChar) return;
+            const results = loadResults();
+            results[selfChar] = results[selfChar] || {};
+            results[selfChar][selChar] = results[selfChar][selChar] || { win: 0, lose: 0 };
+            results[selfChar][selChar][type]++;
+            saveResults(results);
+            updateBtnWithStats(selChar, document.getElementById(selChar), results, selfChar);
+            updateWinRateInfo(results, selfChar);
+        };
+
+        window.onload = () => {
+            const results = loadResults();
+            document.getElementById('selfCharacterSelect').innerHTML = fighters.map(f => 
+                `<option value="${f}">${f}</option>`).join('');
+            document.getElementById('selfCharacterSelect').addEventListener('change', selectSelfCharacter);
+            fighters.forEach(name => {
+                const li = document.createElement('li');
+                li.id = name;
+                li.textContent = name;
+                li.addEventListener('click', () => selectCharacter(name, li, results, selfChar));
+                document.getElementById('menu').appendChild(li);
+                updateBtnWithStats(name, li, results, selfChar);
+            });
+            updateWinRateInfo(results, selfChar);
+        };
+    </script>
+</body>
+</html>

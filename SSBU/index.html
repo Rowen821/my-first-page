@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FALNIX Music - あなただけの音楽空間</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FALNIX Musicは、お気に入りの音楽をジャンル別に楽しめるWebサイトです。">
+    <meta name="keywords" content="音楽, YouTube, dubstep, techno">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/destyle.css@1.0.15/destyle.css"> -->
+</head>
+<body>
+    <header>
+        <h1>Rowen Tool</h1>
+    </header>
+    <nav>
+        <ul class="flex" id="menu">
+            <!-- <li id="dubstep">dubstep</li> -->
+        </ul>
+    </nav>
+    <article id="article">
+        <!-- <section>
+            <p>Fire</p>
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/Bz3DKGHSeoI?si=sM6snJT1IJp-hBRG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </section> -->
+    </article>
+</body>
+<style>
+
+.flex{
+    display: flex;
+    flex-wrap: wrap;
+}
+nav {
+    margin: 0%;
+    padding: 0;
+    border: 1px solid #00c;
+}
+ul{
+    margin: 0;
+    padding: 2%;
+    border: 1px solid #0a0;
+}
+li{
+    margin: 1%;
+    padding: 1%;
+    list-style: none;
+    border: 1px solid #f00;
+}
+img{
+  width: 7vw;
+  height: auto;
+}
+article {
+    width: 79vw;
+}
+.youtube {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+.youtube iframe {
+  width: 100%;
+  height: 100%;
+}
+</style>
+<script>
+const fighter = [
+    "マリオ", "ドンキーコング", "リンク", "サムス", "ヨッシー", "カービィ", "ピカチュウ", "ポケモントレーナー", "ルイージ", "ネス",
+    "フォックス", "ピーチ", "ダックハント", "アイスクライマー", "ファルコ", "マルス", "ルキナ", "シーク", "ゼルダ", "ロイ",
+    "クロム", "リュウ", "ケン", "カズヤ", "スネーク", "クッパ", "インクリング", "パルテナ", "パックマン", "ロボット",
+    "シモン", "リヒター", "ピチュー", "プリン", "メタナイト", "ガノンドロフ", "アイク", "ミュウツー", "ソニック", "ベヨネッタ",
+    "リトルマック", "キングクルール", "ジョーカー", "バンジョー＆カズーイ", "セフィロス", "ダークサムス", "ワリオ", "ゼロスーツサムス", "ロックマン",
+    "勇者", "キャプテンファルコン", "クラウド", "デイジー", "デデデ", "ディディーコング", "テリー", "ゲーム＆ウォッチ", "ガオガエン", "ゲッコウガ", "カムイ", "クッパＪｒ", 
+    "ルカリオ", "リュカ", "ドクターマリオ", "ベレト", "格闘Ｍｉｉ", "剣術Ｍｉｉ", "射撃Ｍｉｉ", "むらびと", "パックンフラワー", "ピクミン＆オリマー", "ピット", "ブラックピット", "ルフレ", 
+    "リドリー", "チコ＆ロゼッタ", "しずえ", "シュルク", "トゥーンリンク", "ＷｉｉＦｉｔトレーナー", "ウルフ", "こどもリンク", "ホムラ＆ヒカリ", "ソラ", "スティーブ", "ミェンミェン"
+];
+
+
+
+window.onload = function() {
+  let menu = document.getElementById("menu");
+  for (let i = 0; i < fighter.length; i++) {
+    let li = document.createElement("li");
+    li.id = fighter[i];
+    // li.textContent = fighter[i];
+
+    let img = document.createElement("img");
+    img.class = "cls_fighter";
+    img.src = `./image/${fighter[i]}.png`;
+    
+    li.appendChild(img);
+
+    menu.appendChild(li);
+  }
+
+}
+</script>
+<!-- <script src="./index.js"></script> -->
+</html>
